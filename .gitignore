@@ -1,0 +1,6 @@
+# Exclude query result outputs — may contain sensitive server/database info
+Results/
+**/Results/
+
+# Exclude zip archives
+*.zip
