@@ -1,11 +1,55 @@
+# Check and install required modules
+$requiredModules = @("Az", "SqlServer", "ImportExcel")
+foreach ($module in $requiredModules) {
+    if (-not (Get-InstalledModule -Name $module -ErrorAction SilentlyContinue)) {
+        Write-Host "Module '$module' not found. Installing..." -ForegroundColor Yellow
+        Install-Module -Name $module -AllowClobber -Scope CurrentUser -Force
+        Write-Host "Module '$module' installed successfully." -ForegroundColor Green
+    }
+}
+
+# Wrapper around Invoke-Sqlcmd with retry logic for Serverless databases waking up
+function Invoke-SqlcmdWithRetry {
+    param(
+        [hashtable]$Params,
+        [int]$MaxRetries = 3,
+        [int]$RetryWaitSeconds = 30
+    )
+    $serverlessErrors = @(
+        "Connection Timeout Expired",
+        "not currently available",
+        "Please retry the connection"
+    )
+    for ($attempt = 1; $attempt -le $MaxRetries; $attempt++) {
+        try {
+            return Invoke-Sqlcmd @Params -ConnectionTimeout 120
+        } catch {
+            $msg = $_.Exception.Message
+            $isServerless = $serverlessErrors | Where-Object { $msg -like "*$_*" }
+            if ($isServerless -and $attempt -lt $MaxRetries) {
+                Write-Host "  Database is waking up (Serverless). Waiting $RetryWaitSeconds seconds before retry $attempt/$($MaxRetries - 1)..." -ForegroundColor Yellow
+                Start-Sleep -Seconds $RetryWaitSeconds
+            } else {
+                throw
+            }
+        }
+    }
+}
+
 # Authenticate to Azure
-Connect-AzAccount | Out-Null # Prompts for interactive login but suppresses the output
+try {
+    Update-AzConfig -LoginExperienceV2 Off | Out-Null
+    Connect-AzAccount | Out-Null # Prompts for interactive login but suppresses the output
+} catch {
+    Write-Host "Login cancelled or failed. Exiting." -ForegroundColor Red
+    exit
+}
 
 Write-Host "Welcome to AzureSQLTool" -ForegroundColor Cyan
 
 # Task selection menu
 Write-Host "What do you want to do? Choose a number"
-$options = @("1 Performances", "2 Quick Investigation", "3 DB Tier Down", "4 AUTO_SHRINK", "5 Custom Queries")
+$options = @("1 Performances", "2 Quick Investigation", "3 Azure SQL Database Perfect Tuning", "4 AUTO_SHRINK", "5 Custom Queries")
 $options | ForEach-Object { Write-Host $_ }
 $choice = Read-Host "Enter your choice (1-5)"
 
@@ -54,7 +98,7 @@ if ($choice -match '^[1-5]$') {
             
             if ($choice -eq '3') {
                 # Initialize the CSV file
-                $csvPath = ".\Results\DB_Tier_Down.csv"
+                $csvPath = ".\Results\Azure_SQL_Database_Perfect_Tuning.csv"
                 if (-Not (Test-Path $csvPath)) {
                     New-Item -Path $csvPath -ItemType File | Out-Null
                 }
@@ -65,9 +109,9 @@ if ($choice -match '^[1-5]$') {
                     ForEach-Object {
                         Write-Host "Running query on master database in $($ServerName.ServerName)..."
                         try {
-                            $results = Invoke-Sqlcmd -ServerInstance $ServerName.FullyQualifiedDomainName -Database "master" -AccessToken $access_token -InputFile $_.FullName
+                            $results = Invoke-SqlcmdWithRetry -Params @{ ServerInstance = $ServerName.FullyQualifiedDomainName; Database = "master"; AccessToken = $access_token; InputFile = $_.FullName }
                             $results | Export-Csv -Path $csvPath -Append -NoTypeInformation
-                            Write-Host "Query executed and results appended to DB_Tier_Down.csv for Server $($ServerName.FullyQualifiedDomainName)"
+                            Write-Host "Query executed and results appended to Azure_SQL_Database_Perfect_Tuning.csv for Server $($ServerName.FullyQualifiedDomainName)"
                         } catch {
                             Write-Host "Error executing query $($_.BaseName) on master database: $($_.Exception.Message)" -ForegroundColor Red
                         }
@@ -78,20 +122,21 @@ if ($choice -match '^[1-5]$') {
                 Where-Object { $_.DatabaseName -like "$databasePattern" -and $_.DatabaseName -ne "master" } | 
                 ForEach-Object {
                     $db = $_
-                    Write-Host "Querying $($db.DatabaseName)" -ForegroundColor Red
+                    Write-Host "Querying $($db.DatabaseName)" -ForegroundColor DarkYellow
 
                     # Execute default code for options 1, 2, 4, 5
                     Get-ChildItem $folderPath -File | 
                         Sort-Object {[regex]::Replace($_.BaseName, '\D', '') -as [int]} | 
                         ForEach-Object {
                             $queryName = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
+                            $worksheetName = if ($queryName.Length -gt 31) { $queryName.Substring(0, 31) } else { $queryName }
                             $timeStamp = Get-Date -Format "HH:mm:ss"
                             Write-Host "Executing query: $queryName at $timeStamp"
                             try {
                                 $taskName = $selectedFolder -replace '^\d+\s', '' # Clean up the task name for the filename
-                                $result = Invoke-Sqlcmd -ServerInstance $ServerName.FullyQualifiedDomainName -Database $db.DatabaseName -AccessToken $access_token -InputFile $_.FullName
+                                $result = Invoke-SqlcmdWithRetry -Params @{ ServerInstance = $ServerName.FullyQualifiedDomainName; Database = $db.DatabaseName; AccessToken = $access_token; InputFile = $_.FullName }
                                 $excelPath = ".\Results\$taskName`_$($db.DatabaseName)_$DateTime.xlsx"
-                                $result | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors | Export-Excel -Path $excelPath -WorksheetName $queryName -AutoSize
+                                $result | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors | Export-Excel -Path $excelPath -WorksheetName $worksheetName -AutoSize
                             } catch {
                                 $errorMessage = if ($_.Exception.Message) { $_.Exception.Message } else { "An unknown error occurred." }
                                 Write-Host "Error executing query $queryName on Database $($db.DatabaseName): $errorMessage" -ForegroundColor Red
