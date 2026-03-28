@@ -36,7 +36,7 @@ You are presented with five categories to choose from:
 |---|----------|-------------|
 | 1 | Performances | Performance-related diagnostics (I/O, buffer, indexes, wait stats, query stats, etc.) |
 | 2 | Quick Investigation | Blocking detection, lock waits, geo-replication status, resumable index rebuilds, etc. |
-| 3 | Azure SQL Database Perfect Tuning | Evaluates whether Azure SQL databases can be downgraded to a lower service tier |
+| 3 | Perfect Tuning | Evaluates whether Azure SQL databases can be downgraded to a lower service tier |
 | 4 | AUTO_SHRINK | Checks if AUTO_SHRINK is enabled on databases |
 | 5 | Custom Queries | Ad hoc queries (plan cache analysis, duplicate indexes, missing indexes, etc.) |
 
@@ -61,7 +61,7 @@ The script iterates through all subscriptions → servers → databases that mat
 | Category | Output format | File location |
 |----------|--------------|---------------|
 | 1, 2, 4, 5 | Excel (`.xlsx`), one worksheet per query | `.\Results\<Category>_<DatabaseName>_<Date>.xlsx` |
-| 3 (Azure SQL Database Perfect Tuning) | CSV (`.csv`), appended across all servers | `.\Results\Azure_SQL_Database_Perfect_Tuning.csv` |
+| 3 (Perfect Tuning) | CSV (`.csv`), appended across all servers | `.\Results\Azure_SQL_Database_Perfect_Tuning.csv` |
 
 - Excel files use `Export-Excel` with `AutoSize` columns.
 - Each worksheet is named after the query file (truncated to 31 characters to comply with Excel's tab name limit).
@@ -102,7 +102,7 @@ IO stalls, buffer usage, connection stats, wait stats, index fragmentation, miss
 ### 2 - Quick Investigation
 Blocking detection, lock waits, top DB waits, high aggregate duration queries, geo-replication link status, resumable index rebuilds, index hints.
 
-### 3 - Azure SQL Database Perfect Tuning
+### 3 - Perfect Tuning
 Runs against the `master` database and queries `sys.resource_stats` to show average/max CPU, I/O, log write, session, and worker percentages over the last 30 days — helping identify databases that could be moved to a lower service tier.
 
 ### 4 - AUTO_SHRINK
@@ -137,7 +137,7 @@ Welcome to AzureSQLTool
 What do you want to do? Choose a number
 1 Performances
 2 Quick Investigation
-3 Azure SQL Database Perfect Tuning
+3 Perfect Tuning
 4 AUTO_SHRINK
 5 Custom Queries
 Enter your choice (1-5): 1

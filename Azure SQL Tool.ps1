@@ -49,7 +49,7 @@ Write-Host "Welcome to AzureSQLTool" -ForegroundColor Cyan
 
 # Task selection menu
 Write-Host "What do you want to do? Choose a number"
-$options = @("1 Performances", "2 Quick Investigation", "3 Azure SQL Database Perfect Tuning", "4 AUTO_SHRINK", "5 Custom Queries")
+$options = @("1 Performances", "2 Quick Investigation", "3 Perfect Tuning", "4 AUTO_SHRINK", "5 Custom Queries")
 $options | ForEach-Object { Write-Host $_ }
 $choice = Read-Host "Enter your choice (1-5)"
 
@@ -98,7 +98,7 @@ if ($choice -match '^[1-5]$') {
             
             if ($choice -eq '3') {
                 # Initialize the CSV file
-                $csvPath = ".\Results\Azure_SQL_Database_Perfect_Tuning.csv"
+                $csvPath = ".\Results\Perfect_Tuning.csv"
                 if (-Not (Test-Path $csvPath)) {
                     New-Item -Path $csvPath -ItemType File | Out-Null
                 }
@@ -111,7 +111,7 @@ if ($choice -match '^[1-5]$') {
                         try {
                             $results = Invoke-SqlcmdWithRetry -Params @{ ServerInstance = $ServerName.FullyQualifiedDomainName; Database = "master"; AccessToken = $access_token; InputFile = $_.FullName }
                             $results | Export-Csv -Path $csvPath -Append -NoTypeInformation
-                            Write-Host "Query executed and results appended to Azure_SQL_Database_Perfect_Tuning.csv for Server $($ServerName.FullyQualifiedDomainName)"
+                            Write-Host "Query executed and results appended to Perfect_Tuning.csv for Server $($ServerName.FullyQualifiedDomainName)"
                         } catch {
                             Write-Host "Error executing query $($_.BaseName) on master database: $($_.Exception.Message)" -ForegroundColor Red
                         }
