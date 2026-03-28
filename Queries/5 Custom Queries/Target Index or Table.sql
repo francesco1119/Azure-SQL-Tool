@@ -15,7 +15,8 @@ SELECT OBJECT_SCHEMA_NAME (stx.objectid, stx.dbid) +'.'+OBJECT_NAME(stx.objectid
   eqs.total_worker_time AS total_cpu_time,
   eqs.total_logical_reads/execution_count AS avg_logical_reads,
   eqs.total_logical_reads,
-  eqs.last_execution_time
+  eqs.last_execution_time,
+  'Finds queries in the plan cache referencing a specific index or table. Replace bqm in the WHERE clause with your target index or table name.' AS Info
 FROM sys.dm_exec_query_stats AS eqs
      CROSS APPLY sys.dm_exec_text_query_plan(eqs.plan_handle, 
 											 eqs.statement_start_offset, 

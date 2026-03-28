@@ -20,6 +20,7 @@ SELECT o.name
 		ELSE 1.00 * (s.user_seeks + s.user_scans + s.user_lookups) / s.user_updates
 		END AS reads_per_write
 	,'DROP INDEX ' + QUOTENAME(i.name) + ' ON ' + QUOTENAME(c.name) + '.' + QUOTENAME(OBJECT_NAME(s.object_id)) AS 'drop statement'
+	,'Nonclustered indexes with low reads vs writes on tables > 10K rows. Stats reset on restart - ensure instance has been running long enough. Investigate before dropping.' AS Info
 FROM sys.dm_db_index_usage_stats s
 INNER JOIN sys.indexes i ON i.index_id = s.index_id
 	AND s.object_id = i.object_id

@@ -20,8 +20,10 @@ SET @total = @singleUse + @multiUse
 
 SELECT 'Single Used Plan Count' AS Matrix
 	,ROUND((@singleUse / @total) * 100, 2) [percentage_distribution_of_plan_usecount]
+	,'High single-use % means plan cache bloat - consider enabling Optimize for Ad Hoc Workloads' AS Info
 
 UNION ALL
 
 SELECT '> Single Used Plan Count'
 	,ROUND((@multiUse / @total) * 100, 2)
+	,'' AS Info

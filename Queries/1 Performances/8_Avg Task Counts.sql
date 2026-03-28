@@ -22,7 +22,8 @@ SELECT
 		WHEN Metric = 'AvgRunnableTaskCount' THEN 'Sustained values above 1 are a good sign of CPU pressure'
 		WHEN Metric = 'AvgPendingDiskIOCount' THEN 'Sustained values above 1 are a sign of disk pressure'
         ELSE ''
-    END AS Comment
+    END AS Comment,
+    'Run multiple times. Sustained values above 10 for Task/Work Queue suggest blocking or contention; above 1 for Runnable Tasks indicates CPU pressure; above 1 for Pending DiskIO indicates disk pressure' AS Info
 FROM 
     (
         SELECT AvgTaskCount, AvgWorkQueueCount, AvgRunnableTaskCount, AvgPendingDiskIOCount, SystemTime

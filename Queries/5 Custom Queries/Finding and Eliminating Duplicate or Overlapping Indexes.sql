@@ -53,7 +53,7 @@ AS (
 			,'CLUSTERED'
 			)
 	)
-SELECT *
+SELECT *, 'Finds duplicate or overlapping indexes based on key column lists. Investigate thoroughly before dropping - consider the full workload and index hints.' AS Info
 FROM CTE_INDEX_DATA DUPE1
 WHERE EXISTS (
 		SELECT *

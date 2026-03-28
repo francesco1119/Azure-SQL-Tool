@@ -11,6 +11,7 @@ SELECT SCHEMA_NAME(o.schema_id) AS [schema]
 FROM sys.indexes i 
 	INNER JOIN sys.objects o ON i.object_id = o.object_id
     INNER JOIN sys.partitions p ON i.object_id = p.object_id AND i.index_id = p.index_id
-    LEFT OUTER JOIN sys.dm_db_index_usage_stats ius ON i.object_id = ius.object_id AND i.index_id = ius.index_id
+    LEFT OUTER JOIN sys.dm_db_index_usage_stats ius ON i.object_id = ius.object_id AND i.index_id = ius.index_id,
+    (SELECT 'Heap tables have no clustered index. Large heaps with high reads can benefit from a clustered index to avoid full table scans.' AS Info) AS inf
 WHERE i.type_desc = 'HEAP'
 ORDER BY rows desc

@@ -8,7 +8,7 @@ SELECT sch.name AS SchemaName
 	MAX(s.row_count) AS 'Rows'
 	,SUM(s.reserved_page_count) * 8.0 / (1024 * 1024) AS 'GB'
 	,(8 * 1024 * SUM(s.reserved_page_count)) / MAX(s.row_count) AS 'Bytes/Row'
-	,'Search for the biggest tables and the biggest Bytes/Row' AS Description
+	,'Search for the biggest tables and the biggest Bytes/Row' AS Info
 FROM sys.dm_db_partition_stats s
 JOIN sys.indexes i ON s.object_id = i.object_id
 	AND s.index_id = i.index_id

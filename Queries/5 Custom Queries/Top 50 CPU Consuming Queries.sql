@@ -5,7 +5,8 @@ Select
 	 wt.total_worker_time/wt.execution_count/1000000 AS [Average CPU Time(second)],
      wt.total_worker_time/1000000 AS [Total CPU Time(second)],
      qp.query_plan,
-     DB_NAME(st.dbid) AS [Database Name]
+     DB_NAME(st.dbid) AS [Database Name],
+     'Top 50 queries by total CPU time across the instance. Useful for identifying the heaviest consumers regardless of database.' AS Info
 from 
     (select top 50 
           qs.last_execution_time,

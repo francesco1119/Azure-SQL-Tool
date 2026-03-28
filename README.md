@@ -61,7 +61,7 @@ The script iterates through all subscriptions → servers → databases that mat
 | Category | Output format | File location |
 |----------|--------------|---------------|
 | 1, 2, 4, 5 | Excel (`.xlsx`), one worksheet per query | `.\Results\<Category>_<DatabaseName>_<Date>.xlsx` |
-| 3 (Perfect Tuning) | CSV (`.csv`), appended across all servers | `.\Results\Azure_SQL_Database_Perfect_Tuning.csv` |
+| 3 (Perfect Tuning) | CSV (`.csv`), appended across all servers | `.\Results\Perfect_Tuning.csv` |
 
 - Excel files use `Export-Excel` with `AutoSize` columns.
 - Each worksheet is named after the query file (truncated to 31 characters to comply with Excel's tab name limit).
@@ -97,19 +97,86 @@ This is a standalone, parameterized version of the AUTO_SHRINK check.
 ## Query Categories
 
 ### 1 - Performances
-IO stalls, buffer usage, connection stats, wait stats, index fragmentation, missing indexes, query execution stats, stored procedure stats, columnstore indexes, volatile indexes, implicit conversions, and more.
+
+| Query | Description |
+|-------|-------------|
+| `4_IO Stalls by File` | Average IO stall latency (read/write/total) per database — identifies I/O bottlenecks across the instance |
+| `5_IO Usage By Database` | I/O usage breakdown by database showing total, read, and write MB with percentages |
+| `6_Buffer by Database` | Buffer pool memory usage and cached size per database |
+| `7_Connection by IP` | Connection counts grouped by client IP address, program name, host, and login |
+| `8_Avg Task Counts` | Average scheduler task counts per metric — detects CPU pressure and disk I/O pressure |
+| `12_Memory Clerk Usage` | Top 10 memory clerks by usage — identifies sources of memory pressure |
+| `13_Ad hoc Queries` | Single-use ad-hoc and prepared queries bloating the plan cache |
+| `18_Last VLF Status` | Status of the last VLF in the transaction log — determines whether the log can be shrunk |
+| `21_IO Stats By File` | Detailed I/O statistics per file for the current database (size, reads, writes, stall %) |
+| `25_Query Execution Counts` | Top 50 most frequently executed queries for the current database |
+| `26_Top Worker Time Queries` | Top 50 queries by total CPU (worker) time — identifies highest CPU consumers |
+| `27_Top Logical Reads Queries` | Top 50 queries by total logical reads — identifies highest memory consumers |
+| `28_Top Avg Elapsed Time Queries` | Top 50 queries by average elapsed time — identifies slowest queries |
+| `29_SP Execution Counts` | Cached stored procedures ranked by execution count |
+| `30_SP Avg Elapsed Time` | Cached stored procedures ranked by average elapsed time |
+| `31_SP Worker Time` | Cached stored procedures ranked by total CPU time |
+| `32_SP Logical Reads` | Cached stored procedures ranked by total logical reads |
+| `33_SP Physical Reads` | Cached stored procedures ranked by total physical reads |
+| `34_SP Logical Writes` | Cached stored procedures ranked by total logical writes |
+| `35_Top IO Statements` | Top 50 statements by average I/O, grouped by stored procedure |
+| `36_Bad NC Indexes` | Nonclustered indexes where writes exceed reads — candidates for removal |
+| `37_Missing Indexes` | Missing indexes ranked by impact with a ready-to-run `CREATE INDEX` statement (Brent Ozar) |
+| `38_Missing Index Warnings` | Cached execution plans that contain missing index warnings |
+| `39_Buffer Usage` | Buffer pool usage broken down by table and index — candidates for data compression |
+| `40_Table Sizes` | Table sizes in GB with row count and bytes per row |
+| `41_Table Properties` | Key table properties (compression, CDC, temporal, memory-optimized) ordered by row count |
+| `42_Statistics Update` | Statistics update dates and sample rates for all indexes |
+| `43_Volatile Indexes` | Indexes and statistics with the highest modification counts |
+| `44_Index Fragmentation` | Fragmentation level for indexes larger than 2500 pages |
+| `45_Overall Index Usage - Reads` | All index read/write stats ordered by total reads |
+| `46_Overall Index Usage - Writes` | All index read/write stats ordered by total writes |
+| `47_Columnstore Index Stat` | Physical health of columnstore row groups including fragmentation and compression state |
+| `49_UDF Statistics` | Scalar UDF execution statistics — identifies expensive user-defined functions |
+| `50_Implicit Conversions` | Queries with implicit type conversions that prevent index seeks and cause full scans |
+| `Find plans using an index and index hints` | Queries in the plan cache using a specific index or forced index hints |
 
 ### 2 - Quick Investigation
-Blocking detection, lock waits, top DB waits, high aggregate duration queries, geo-replication link status, resumable index rebuilds, index hints.
+
+| Query | Description |
+|-------|-------------|
+| `9_Detect Blocking` | Current blocking chains showing blocker and waiter SQL text |
+| `22_Recent Resource Usage` | CPU, IO, memory, and session metrics every 15 seconds for the last 64 minutes |
+| `24_Top DB Waits` | Cumulative wait statistics for the current database since last restart or failover |
+| `48_Lock Waits` | Row and page lock wait counts and durations by table and index |
+| `51_High Aggregate Duration` | Highest aggregate duration queries from Query Store over the last hour |
+| `52_Input Buffer` | Current query text for all active non-system sessions |
+| `53_Resumable Index Rebuild` | Any in-progress resumable index rebuild operations with completion percentage |
+| `55_Geo-Replication Link Status` | Geo-replication link status and replication lag for all secondary databases |
+| `56_Index_Hint` | Queries in the plan cache using forced index hints (`ForcedIndex="1"`) |
 
 ### 3 - Perfect Tuning
-Runs against the `master` database and queries `sys.resource_stats` to show average/max CPU, I/O, log write, session, and worker percentages over the last 30 days — helping identify databases that could be moved to a lower service tier.
+
+| Query | Description |
+|-------|-------------|
+| `Perfect_Tuning` | Queries `sys.resource_stats` over the last 30 days to show avg/max CPU, IO, log write, sessions, and workers per database — identifies candidates for service tier downgrade. Runs against `master`. |
 
 ### 4 - AUTO_SHRINK
-Checks whether `AUTO_SHRINK` is enabled on databases (via `sys.databases`).
+
+| Query | Description |
+|-------|-------------|
+| `AUTO_SHRINK_Check` | Reports whether `AUTO_SHRINK` is enabled for each database on the server |
+| `AUTO_SHRINK_Enable` | Enables `AUTO_SHRINK` on all databases where it is currently disabled |
 
 ### 5 - Custom Queries
-Plan cache profiling, single-use plans, duplicate/overlapping indexes, missing indexes, indexes not in use, tables without primary keys, queries using a specific index, and implicit conversions.
+
+| Query | Description |
+|-------|-------------|
+| `Top 50 CPU Consuming Queries` | Top 50 queries by total CPU time across the entire instance |
+| `Plan Cache Profiler` | Plan cache breakdown by object type (Adhoc, Proc, Prepared, etc.) as % of total entries |
+| `Single Used Plan` | Ratio of single-use vs reused plans — high single-use % indicates plan cache bloat |
+| `Execution Count` | All queries with execution count = 1 — potential contributors to plan cache bloat |
+| `Target Index or Table` | Queries in the plan cache referencing a specific index or table name (replace `bqm` in the WHERE clause) |
+| `Index_in_Query_Store` | Queries in Query Store referencing a specific index (replace `PK_Sales_Invoices` in the WHERE clause) |
+| `Finding and Eliminating Duplicate or Overlapping Indexes` | Identifies duplicate or overlapping indexes by comparing key column lists |
+| `Find Indexes Not In Use` | Nonclustered indexes with low reads relative to writes, with a ready-to-run `DROP INDEX` statement |
+| `Find Tables Without Primary Keys` | Heap tables (no clustered index) with read/write stats and row counts |
+| `Queries in the Plan Cache That Are Missing an Index` | Cached plans with missing index warnings, ranked by total impact score |
 
 ---
 

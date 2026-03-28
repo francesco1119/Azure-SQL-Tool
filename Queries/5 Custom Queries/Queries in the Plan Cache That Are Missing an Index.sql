@@ -20,6 +20,7 @@ SELECT qp.query_plan
 	,qp.query_plan.value('declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/showplan"; (/ShowPlanXML/BatchSequence/Batch/Statements/StmtSimple/QueryPlan/MissingIndexes/MissingIndexGroup/@Impact)[1]', 'decimal(18,4)') * execution_count AS TotalImpact
 	,qp.query_plan.value('declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/showplan"; (/ShowPlanXML/BatchSequence/Batch/Statements/StmtSimple/QueryPlan/MissingIndexes/MissingIndexGroup/MissingIndex/@Database)[1]', 'varchar(100)') AS [DATABASE]
 	,qp.query_plan.value('declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/showplan"; (/ShowPlanXML/BatchSequence/Batch/Statements/StmtSimple/QueryPlan/MissingIndexes/MissingIndexGroup/MissingIndex/@Table)[1]', 'varchar(100)') AS [TABLE]
+	,'Finds cached plans containing missing index warnings. TotalImpact = Impact x execution_count. Do NOT blindly add indexes - investigate first.' AS Info
 FROM sys.dm_exec_query_stats qs
 CROSS APPLY sys.dm_exec_sql_text(sql_handle) st
 CROSS APPLY sys.dm_exec_query_plan(plan_handle) qp

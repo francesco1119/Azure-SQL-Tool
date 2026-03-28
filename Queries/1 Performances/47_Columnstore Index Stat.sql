@@ -13,6 +13,7 @@ SELECT OBJECT_NAME(ps.object_id) AS [TableName]
 	,ps.has_vertipaq_optimization
 	,ps.deleted_rows
 	,100 * (ISNULL(ps.deleted_rows, 0)) / ps.total_rows AS [Fragmentation]
+	,'Shows physical health of columnstore row groups. High Fragmentation % indicates deleted rows - consider rebuilding. Check trim_reason_desc for compression issues.' AS Info
 FROM sys.dm_db_column_store_row_group_physical_stats AS ps WITH (NOLOCK)
 INNER JOIN sys.indexes AS i WITH (NOLOCK) ON ps.object_id = i.object_id
 	AND ps.index_id = i.index_id

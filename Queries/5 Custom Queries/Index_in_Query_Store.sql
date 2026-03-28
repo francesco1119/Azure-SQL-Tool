@@ -13,7 +13,8 @@ SELECT
     SUM(qsq.count_compiles) AS sum_compiles,
     TRY_CONVERT(XML, (SELECT TOP 1 qsp2.query_plan from sys.query_store_plan qsp2
         WHERE qsp2.query_id=qsq.query_id
-        ORDER BY qsp2.plan_id DESC)) AS query_plan
+        ORDER BY qsp2.plan_id DESC)) AS query_plan,
+    'Finds queries in Query Store referencing a specific index. Replace PK_Sales_Invoices with your index name. Requires Query Store to be enabled.' AS Info
 FROM sys.query_store_query qsq
 JOIN sys.query_store_plan qsp on qsq.query_id=qsp.query_id
 CROSS APPLY (SELECT TRY_CONVERT(XML, qsp.query_plan) AS query_plan_xml) AS qpx
