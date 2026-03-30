@@ -38,7 +38,8 @@ You are presented with five categories to choose from:
 | 2 | Quick Investigation | Blocking detection, lock waits, geo-replication status, resumable index rebuilds, etc. |
 | 3 | Perfect Tuning | Evaluates whether Azure SQL databases can be downgraded to a lower service tier |
 | 4 | AUTO_SHRINK | Checks if AUTO_SHRINK is enabled on databases |
-| 5 | Custom Queries | Ad hoc queries (plan cache analysis, duplicate indexes, missing indexes, etc.) |
+| 5 | compatibility_level | Queries related to database compatibility level analysis |
+| 6 | Custom Queries | Ad hoc queries (plan cache analysis, duplicate indexes, missing indexes, etc.) |
 
 ### 4. Target Filtering
 
@@ -103,8 +104,6 @@ This is a standalone, parameterized version of the AUTO_SHRINK check.
 | `4_IO Stalls by File` | Average IO stall latency (read/write/total) per database — identifies I/O bottlenecks across the instance |
 | `5_IO Usage By Database` | I/O usage breakdown by database showing total, read, and write MB with percentages |
 | `6_Buffer by Database` | Buffer pool memory usage and cached size per database |
-| `7_Connection by IP` | Connection counts grouped by client IP address, program name, host, and login |
-| `8_Avg Task Counts` | Average scheduler task counts per metric — detects CPU pressure and disk I/O pressure |
 | `12_Memory Clerk Usage` | Top 10 memory clerks by usage — identifies sources of memory pressure |
 | `13_Ad hoc Queries` | Single-use ad-hoc and prepared queries bloating the plan cache |
 | `18_Last VLF Status` | Status of the last VLF in the transaction log — determines whether the log can be shrunk |
@@ -134,21 +133,28 @@ This is a standalone, parameterized version of the AUTO_SHRINK check.
 | `47_Columnstore Index Stat` | Physical health of columnstore row groups including fragmentation and compression state |
 | `49_UDF Statistics` | Scalar UDF execution statistics — identifies expensive user-defined functions |
 | `50_Implicit Conversions` | Queries with implicit type conversions that prevent index seeks and cause full scans |
-| `Find plans using an index and index hints` | Queries in the plan cache using a specific index or forced index hints |
+| `51_High Aggregate Duration` | Query Store historical analysis of highest aggregate duration queries over the last hour |
+| `53_Resumable Index Rebuild` | Status of any in-progress resumable index rebuild operations with completion percentage |
+| `Find Indexes Not In Use` | Nonclustered indexes with low reads relative to writes, with a ready-to-run `DROP INDEX` statement |
+| `Find Tables Without Primary Keys` | Heap tables (no clustered index) with read/write stats and row counts |
+| `Finding and Eliminating Duplicate or Overlapping Indexes` | Identifies duplicate or overlapping indexes by comparing key column lists |
+| `Queries in the Plan Cache That Are Missing an Index` | Cached plans with missing index warnings, ranked by total impact score |
+| `Top 50 CPU Consuming Queries` | Top 50 queries by total CPU time across the entire instance (complements `26_Top Worker Time Queries` which is DB-scoped) |
 
 ### 2 - Quick Investigation
 
 | Query | Description |
 |-------|-------------|
+| `7_Connection by IP` | Connection counts grouped by client IP address, program name, host, and login |
+| `8_Avg Task Counts` | Average scheduler task counts per metric — run multiple times to detect active CPU and disk pressure |
 | `9_Detect Blocking` | Current blocking chains showing blocker and waiter SQL text |
 | `22_Recent Resource Usage` | CPU, IO, memory, and session metrics every 15 seconds for the last 64 minutes |
 | `24_Top DB Waits` | Cumulative wait statistics for the current database since last restart or failover |
 | `48_Lock Waits` | Row and page lock wait counts and durations by table and index |
-| `51_High Aggregate Duration` | Highest aggregate duration queries from Query Store over the last hour |
 | `52_Input Buffer` | Current query text for all active non-system sessions |
-| `53_Resumable Index Rebuild` | Any in-progress resumable index rebuild operations with completion percentage |
 | `55_Geo-Replication Link Status` | Geo-replication link status and replication lag for all secondary databases |
 | `56_Index_Hint` | Queries in the plan cache using forced index hints (`ForcedIndex="1"`) |
+| `57_Active Requests` | Active user requests with CPU time, elapsed time, wait type, and statement text — run multiple times during an incident to track what sessions are doing |
 
 ### 3 - Perfect Tuning
 
@@ -163,20 +169,20 @@ This is a standalone, parameterized version of the AUTO_SHRINK check.
 | `AUTO_SHRINK_Check` | Reports whether `AUTO_SHRINK` is enabled for each database on the server |
 | `AUTO_SHRINK_Enable` | Enables `AUTO_SHRINK` on all databases where it is currently disabled |
 
-### 5 - Custom Queries
+### 5 - compatibility_level
 
 | Query | Description |
 |-------|-------------|
-| `Top 50 CPU Consuming Queries` | Top 50 queries by total CPU time across the entire instance |
+| `1_Check_Compatibility_Level` | Reports the current compatibility level, state, and user access mode for the database |
+| `2_Update_Compatibility_Level_160` | Updates the database compatibility level to 160 (SQL Server 2022 / Azure SQL latest) and confirms the change |
+
+### 6 - Custom Queries
+
+| Query | Description |
+|-------|-------------|
 | `Plan Cache Profiler` | Plan cache breakdown by object type (Adhoc, Proc, Prepared, etc.) as % of total entries |
 | `Single Used Plan` | Ratio of single-use vs reused plans — high single-use % indicates plan cache bloat |
 | `Execution Count` | All queries with execution count = 1 — potential contributors to plan cache bloat |
-| `Target Index or Table` | Queries in the plan cache referencing a specific index or table name (replace `bqm` in the WHERE clause) |
-| `Index_in_Query_Store` | Queries in Query Store referencing a specific index (replace `PK_Sales_Invoices` in the WHERE clause) |
-| `Finding and Eliminating Duplicate or Overlapping Indexes` | Identifies duplicate or overlapping indexes by comparing key column lists |
-| `Find Indexes Not In Use` | Nonclustered indexes with low reads relative to writes, with a ready-to-run `DROP INDEX` statement |
-| `Find Tables Without Primary Keys` | Heap tables (no clustered index) with read/write stats and row counts |
-| `Queries in the Plan Cache That Are Missing an Index` | Cached plans with missing index warnings, ranked by total impact score |
 
 ---
 

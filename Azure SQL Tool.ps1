@@ -49,19 +49,65 @@ Write-Host "Welcome to AzureSQLTool" -ForegroundColor Cyan
 
 # Task selection menu
 Write-Host "What do you want to do? Choose a number"
-$options = @("1 Performances", "2 Quick Investigation", "3 Perfect Tuning", "4 AUTO_SHRINK", "5 Custom Queries")
+$options = @("1 Performances", "2 Quick Investigation", "3 Perfect Tuning", "4 AUTO_SHRINK", "5 compatibility_level", "6 Custom Queries")
 $options | ForEach-Object { Write-Host $_ }
-$choice = Read-Host "Enter your choice (1-5)"
+$choice = Read-Host "Enter your choice (1-6)"
 
 # Validate user choice
-if ($choice -match '^[1-5]$') {
+if ($choice -match '^[1-6]$') {
     $selectedFolder = $options[$choice - 1]
     $folderPath = ".\Queries\$selectedFolder"
+
+    # Sub-menu for AUTO_SHRINK option
+    $autoShrinkAction = $null
+    if ($choice -eq '4') {
+        Write-Host "What do you want to do?"
+        Write-Host "1 Check AUTO_SHRINK status"
+        Write-Host "2 Enable AUTO_SHRINK"
+        $autoShrinkChoice = Read-Host "Enter your choice (1-2)"
+        if ($autoShrinkChoice -eq '1') {
+            $autoShrinkAction = 'AUTO_SHRINK_Check'
+        } elseif ($autoShrinkChoice -eq '2') {
+            Write-Host "WARNING: This will enable AUTO_SHRINK on all matching databases." -ForegroundColor Yellow
+            $confirm = Read-Host "Are you sure? (yes/no)"
+            if ($confirm -ne 'yes') {
+                Write-Host "Operation cancelled." -ForegroundColor Red
+                exit
+            }
+            $autoShrinkAction = 'AUTO_SHRINK_Enable'
+        } else {
+            Write-Host "Invalid choice. Exiting." -ForegroundColor Red
+            exit
+        }
+    }
+
+    # Sub-menu for compatibility level option
+    $compatAction = $null
+    if ($choice -eq '5') {
+        Write-Host "What do you want to do?"
+        Write-Host "1 Check compatibility level"
+        Write-Host "2 Update compatibility level to 160"
+        $compatChoice = Read-Host "Enter your choice (1-2)"
+        if ($compatChoice -eq '1') {
+            $compatAction = '1_Check_Compatibility_Level'
+        } elseif ($compatChoice -eq '2') {
+            Write-Host "WARNING: This will update the compatibility level to 160 on all matching databases." -ForegroundColor Yellow
+            $confirm = Read-Host "Are you sure? (yes/no)"
+            if ($confirm -ne 'yes') {
+                Write-Host "Operation cancelled." -ForegroundColor Red
+                exit
+            }
+            $compatAction = '2_Update_Compatibility_Level_160'
+        } else {
+            Write-Host "Invalid choice. Exiting." -ForegroundColor Red
+            exit
+        }
+    }
 
     # User inputs for subscription and server with wildcard support
     $subscriptionPattern = Read-Host "Choose a Subscription (you can use wildcard *)"
     $serverPattern = Read-Host "Choose a Server (you can use wildcard *)"
-    
+
     # Database pattern input only for options other than 3
     if ($choice -ne '3') {
         $databasePattern = Read-Host "Choose a Database (you can use wildcard *)"
@@ -86,13 +132,23 @@ if ($choice -match '^[1-5]$') {
     $ErrorActionPreference = 'Stop'
 
     # Select and iterate through matching subscriptions
-    Get-AzSubscription | Where-Object { $_.Name -like $subscriptionPattern } | ForEach-Object {
+    $matchingSubscriptions = Get-AzSubscription | Where-Object { $_.Name -like $subscriptionPattern }
+    if (-not $matchingSubscriptions) {
+        Write-Host "No subscriptions found matching '$subscriptionPattern'." -ForegroundColor Red
+        exit
+    }
+
+    $matchingSubscriptions | ForEach-Object {
         $subscription = $_.Name
         Select-AzSubscription -SubscriptionName $subscription | Out-Null
         Write-Host "Browsing Azure Subscription: $subscription" -ForegroundColor Green
 
         # Iterate through matching servers
-        Get-AzSqlServer | Where-Object { $_.ServerName -like $serverPattern } | ForEach-Object {
+        $matchingServers = Get-AzSqlServer | Where-Object { $_.ServerName -like $serverPattern }
+        if (-not $matchingServers) {
+            Write-Host "  No servers found matching '$serverPattern' in subscription '$subscription'." -ForegroundColor Yellow
+        }
+        $matchingServers | ForEach-Object {
             $ServerName = $_
             Write-Host "Working on Server: $($ServerName.ServerName)" -ForegroundColor Cyan
             
@@ -118,15 +174,19 @@ if ($choice -match '^[1-5]$') {
                     }
             } else {
                 # Iterate through matching databases for other options
-                Get-AzSqlDatabase -ServerName $ServerName.ServerName -ResourceGroupName $ServerName.ResourceGroupName | 
-                Where-Object { $_.DatabaseName -like "$databasePattern" -and $_.DatabaseName -ne "master" } | 
-                ForEach-Object {
+                $matchingDatabases = Get-AzSqlDatabase -ServerName $ServerName.ServerName -ResourceGroupName $ServerName.ResourceGroupName |
+                    Where-Object { $_.DatabaseName -like "$databasePattern" -and $_.DatabaseName -ne "master" }
+                if (-not $matchingDatabases) {
+                    Write-Host "  No databases found matching '$databasePattern' on server '$($ServerName.ServerName)'." -ForegroundColor Yellow
+                }
+                $matchingDatabases | ForEach-Object {
                     $db = $_
                     Write-Host "Querying $($db.DatabaseName)" -ForegroundColor DarkYellow
 
-                    # Execute default code for options 1, 2, 4, 5
-                    Get-ChildItem $folderPath -File | 
-                        Sort-Object {[regex]::Replace($_.BaseName, '\D', '') -as [int]} | 
+                    # Execute queries — for options 4 and 5 run only the selected file
+                    Get-ChildItem $folderPath -File |
+                        Where-Object { ($choice -ne '4' -or $_.BaseName -eq $autoShrinkAction) -and ($choice -ne '5' -or $_.BaseName -eq $compatAction) } |
+                        Sort-Object {[regex]::Replace($_.BaseName, '\D', '') -as [int]} |
                         ForEach-Object {
                             $queryName = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
                             $worksheetName = if ($queryName.Length -gt 31) { $queryName.Substring(0, 31) } else { $queryName }
@@ -147,5 +207,5 @@ if ($choice -match '^[1-5]$') {
         }
     }
 } else {
-    Write-Host "Invalid choice. Please restart the script and select a valid option." -ForegroundColor Red
+    Write-Host "Invalid choice. Please restart the script and select a valid option (1-6)." -ForegroundColor Red
 }
