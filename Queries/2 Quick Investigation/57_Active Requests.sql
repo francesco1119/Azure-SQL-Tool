@@ -1,7 +1,3 @@
--- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
--- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
--- https://glennsqlperformance.com/resources/
-
 -- Get active requests with CPU time, elapsed time, and wait info (Query 57) (Active Requests)
 SELECT DB_NAME(st.dbid) AS [Database Name]
 	,r.session_id
