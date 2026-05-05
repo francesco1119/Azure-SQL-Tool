@@ -6,40 +6,19 @@ A PowerShell-based diagnostic and analysis tool for Azure SQL databases. It auth
 
 ## Prerequisites
 
-- **PowerShell** with the following modules:
-  - `Az` (Azure PowerShell)
-  - `SqlServer`
-  - `ImportExcel`
+- **PowerShell** with the following modules: `Az`, `SqlServer`, `ImportExcel`
 
 > **Note:** The script automatically checks for these modules at startup and installs any that are missing. No manual setup required.
 
 - Permissions to read Azure SQL resources in the target subscriptions
-- A `Results\` folder in the same directory as the script
 
 ---
 
 ## Usage Example
 
 ```powershell
-# Run from the root of the project
 & '.\Azure SQL Tool.ps1'
 ```
-
-```
-Welcome to AzureSQLTool
-What do you want to do? Choose a number
-1 Performances
-2 Quick Investigation
-3 Perfect Tuning
-4 AUTO_SHRINK
-5 Custom Queries
-Enter your choice (1-5): 1
-Choose a Subscription (you can use wildcard *): Production*
-Choose a Server (you can use wildcard *): sql-prod-*
-Choose a Database (you can use wildcard *): *
-```
-
-Results will be saved to the `Results\` folder.
 
 ---
 
