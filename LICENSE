@@ -28,3 +28,7 @@ are adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
 This project complies with those terms. The queries have been adapted (Info column
 added, text truncation extended, some logic rewritten) but the original authorship
 is Glenn Berry's.
+
+The query in Queries/3 Perfect Tuning/ is adapted from Microsoft documentation:
+  "Monitor Azure SQL Database performance using DMVs"
+  https://learn.microsoft.com/en-us/azure/azure-sql/database/monitoring-with-dmvs?view=azuresql

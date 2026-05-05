@@ -1,3 +1,6 @@
+-- Adapted from Microsoft documentation: Monitor Azure SQL Database performance using DMVs
+-- https://learn.microsoft.com/en-us/azure/azure-sql/database/monitoring-with-dmvs?view=azuresql
+
 WITH ConnectionStats AS (
     SELECT
         database_name,
