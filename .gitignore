@@ -4,3 +4,6 @@ Results/
 
 # Exclude zip archives
 *.zip
+
+# Local-only reference file
+Azure SQL Database Diagnostic Information Queries.sql
