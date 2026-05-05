@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Lists the top statements by average input/output usage for the current database  (Query 35) (Top IO Statements)
 SELECT TOP (50) OBJECT_NAME(qt.objectid, dbid) AS [SP Name]
 	,(qs.total_logical_reads + qs.total_logical_writes) / qs.execution_count AS [Avg IO]

@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Get some key table properties (Query 41) (Table Properties)
 SELECT OBJECT_NAME(t.[object_id]) AS [ObjectName]
 	,p.[rows] AS [Table Rows]

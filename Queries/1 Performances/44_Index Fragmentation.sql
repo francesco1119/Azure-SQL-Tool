@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Get fragmentation info for all indexes above a certain size in the current database  (Query 44) (Index Fragmentation)
 -- Note: This query could take some time on a very large database
 SELECT DB_NAME(ps.database_id) AS [Database Name]

@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Get geo-replication link status for all secondary databases (Query 55) (Geo-Replication Link Status)
 SELECT link_guid
 	,partner_server

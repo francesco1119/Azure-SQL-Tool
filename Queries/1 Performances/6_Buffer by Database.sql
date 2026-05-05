@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Get total buffer usage by database for current instance  (Query 6) (Total Buffer Usage by Database)
 -- This make take some time to run on a busy instance
 WITH AggregateBufferPoolUsage

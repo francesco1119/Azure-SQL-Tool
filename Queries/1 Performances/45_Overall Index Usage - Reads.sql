@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 --- Index Read/Write stats (all tables in current DB) ordered by Reads  (Query 45) (Overall Index Usage - Reads)
 SELECT SCHEMA_NAME(t.[schema_id]) AS [SchemaName]
 	,OBJECT_NAME(i.[object_id]) AS [ObjectName]

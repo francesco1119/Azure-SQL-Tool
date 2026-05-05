@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Top Cached SPs By Total Physical Reads. Physical reads relate to disk read I/O pressure  (Query 33) (SP Physical Reads)
 SELECT TOP (25) p.name AS [SP Name]
 	,qs.total_physical_reads AS [TotalPhysicalReads]

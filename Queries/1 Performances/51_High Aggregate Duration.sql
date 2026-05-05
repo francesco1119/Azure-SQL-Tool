@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Get highest aggregate duration queries over last hour (Query 51) (High Aggregate Duration Queries)
 WITH AggregatedDurationLastHour
 AS (

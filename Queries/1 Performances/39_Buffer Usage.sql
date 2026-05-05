@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Breaks down buffers used by current database by object (table, index) in the buffer cache  (Query 39) (Buffer Usage)
 -- Note: This query could take some time on a busy instance
 SELECT SCHEMA_NAME(o.Schema_ID) AS [Schema Name]

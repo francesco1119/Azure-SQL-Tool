@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Get a count of SQL connections by IP address (Query 7) (Connection Counts by IP Address)    
 SELECT ec.client_net_address
 	,es.[program_name]

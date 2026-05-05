@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Calculates average stalls per read, per write, and per total input/output for each database file  (Query 4) (IO Stalls by File)
 SELECT 
     DB_NAME(fs.database_id) AS [Database Name],

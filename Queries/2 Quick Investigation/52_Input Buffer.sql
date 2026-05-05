@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Get input buffer information for the current database (Query 52) (Input Buffer)
 SELECT es.session_id
 	,DB_NAME(es.database_id) AS [Database Name]

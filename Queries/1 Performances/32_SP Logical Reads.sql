@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Top Cached SPs By Total Logical Reads. Logical reads relate to memory pressure  (Query 32) (SP Logical Reads)
 SELECT TOP (25) p.name AS [SP Name]
 	,qs.total_logical_reads AS [TotalLogicalReads]

@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Get any resumable index rebuild operation information (Query 53) (Resumable Index Rebuild)
 SELECT OBJECT_NAME(iro.object_id) AS [Object Name]
 	,iro.index_id

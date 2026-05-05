@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Detect blocking (run multiple times)  (Query 9) (Detect Blocking)						
 SELECT t1.resource_type AS [lock type]
 	,DB_NAME(resource_database_id) AS [database]

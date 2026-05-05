@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Get lock waits for current database (Query 48) (Lock Waits)
 SELECT o.name AS [table_name]
 	,i.name AS [index_name]

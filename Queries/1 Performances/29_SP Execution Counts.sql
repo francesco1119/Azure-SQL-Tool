@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Top Cached SPs By Execution Count (Query 29) (SP Execution Counts)
 SELECT TOP (100) p.name AS [SP Name]
 	,qs.execution_count AS [Execution Count]

@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- I/O Statistics by file for the current database  (Query 21) (IO Stats By File)
 SELECT DB_NAME(DB_ID()) AS [Database Name]
 	,df.name AS [Logical Name]

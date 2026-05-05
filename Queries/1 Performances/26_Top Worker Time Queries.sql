@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Get top total worker time queries for this database (Query 26) (Top Worker Time Queries)		
 SELECT TOP (50) DB_NAME(t.[dbid]) AS [Database Name]
 	,REPLACE(REPLACE(LEFT(t.[text], 100), CHAR(10), ''), CHAR(13), '') AS [Short Query Text]

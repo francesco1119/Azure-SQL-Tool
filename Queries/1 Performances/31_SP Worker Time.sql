@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Top Cached SPs By Total Worker time. Worker time relates to CPU cost  (Query 31) (SP Worker Time)
 SELECT TOP (25) p.name AS [SP Name]
 	,qs.total_worker_time AS [TotalWorkerTime]

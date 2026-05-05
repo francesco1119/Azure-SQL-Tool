@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Script to find Queries With Implicit Conversion
 
 SELECT OBJECT_SCHEMA_NAME (stx.objectid, stx.dbid) +'.'+OBJECT_NAME(stx.objectid, stx.dbid) AS object_name,

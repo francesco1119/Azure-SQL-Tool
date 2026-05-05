@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Status of last VLF for current database  (Query 18) (Last VLF Status)
 SELECT TOP(1) 
     DB_NAME(li.database_id) AS [Database Name], 

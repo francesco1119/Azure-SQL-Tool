@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Get most frequently executed queries for this database (Query 25) (Query Execution Counts)
 SELECT TOP (50) LEFT(t.[text], 100) AS [Short Query Text]
 	,qs.execution_count AS [Execution Count]

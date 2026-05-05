@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Get Average Task Counts (run multiple times)  (Query 8) (Avg Task Counts)
 -- First, create a Common Table Expression (CTE) to perform the aggregation
 WITH SchedulerStats AS (

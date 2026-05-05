@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Find single-use, ad-hoc and prepared queries that are bloating the plan cache  (Query 13) (Ad hoc Queries)   
 SELECT TOP (50) DB_NAME(t.[dbid]) AS [Database Name]
 	,t.[text] AS [Query Text]

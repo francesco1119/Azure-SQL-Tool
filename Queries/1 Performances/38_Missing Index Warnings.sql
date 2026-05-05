@@ -1,3 +1,7 @@
+-- Adapted from Glenn Berry's Azure SQL Database Diagnostic Information Queries
+-- Copyright (C) Glenn Berry. Non-commercial use only. Credit must be given.
+-- https://glennsqlperformance.com/resources/
+
 -- Find missing index warnings for cached plans in the current database  (Query 38) (Missing Index Warnings)
 -- Note: This query could take some time on a busy instance
 SELECT TOP (25) OBJECT_NAME(objectid) AS [ObjectName]
