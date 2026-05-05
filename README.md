@@ -10,8 +10,6 @@ A PowerShell-based diagnostic and analysis tool for Azure SQL databases. It auth
 
 > **Note:** The script automatically checks for these modules at startup and installs any that are missing. No manual setup required.
 
-- Permissions to read Azure SQL resources in the target subscriptions
-
 ---
 
 ## Usage Example
@@ -30,7 +28,7 @@ You are presented with five categories to choose from:
 |---|----------|-------------|
 | 1 | Performances | Performance-related diagnostics (I/O, buffer, indexes, wait stats, query stats, etc.) |
 | 2 | Quick Investigation | Blocking detection, lock waits, geo-replication status, resumable index rebuilds, etc. |
-| 3 | Perfect Tuning | Evaluates whether Azure SQL databases can be downgraded to a lower service tier |
+| 3 | Perfect Tuning | Evaluates whether Azure SQL databases can be downgraded to a lower service tier — based on [Microsoft DMV monitoring docs](https://learn.microsoft.com/en-us/azure/azure-sql/database/monitoring-with-dmvs?view=azuresql) |
 | 4 | AUTO_SHRINK | Checks if AUTO_SHRINK is enabled on databases |
 | 5 | compatibility_level | Queries related to database compatibility level analysis |
 | 6 | Custom Queries | Ad hoc queries (plan cache analysis, duplicate indexes, missing indexes, etc.) |
