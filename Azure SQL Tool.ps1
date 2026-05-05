@@ -155,9 +155,12 @@ if ($choice -match '^[1-6]$') {
             if ($choice -eq '3') {
                 # Initialize the CSV file
                 $csvPath = ".\Results\Perfect_Tuning.csv"
-                if (-Not (Test-Path $csvPath)) {
-                    New-Item -Path $csvPath -ItemType File | Out-Null
-                }
+				if (-Not (Test-Path ".\Results")) {
+					New-Item -Path ".\Results" -ItemType Directory | Out-Null
+				}
+				if (-Not (Test-Path $csvPath)) {
+					New-Item -Path $csvPath -ItemType File | Out-Null
+				}
 
                 # Iterate through queries in the DB Tier Down folder and run on master database
                 Get-ChildItem $folderPath -File | 

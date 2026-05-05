@@ -1,52 +1,72 @@
-DECLARE @StartDate date = DATEADD(day, -30, GETDATE()) -- 30 Days
-
-SELECT
-    @@SERVERNAME AS ServerName,
-    database_name AS DatabaseName,
-    sysso.edition,
-    sysso.service_objective,
-    (SELECT TOP 1 dtu_limit FROM sys.resource_stats AS rs3 WHERE rs3.database_name = rs1.database_name ORDER BY rs3.start_time DESC)  AS DTU,
-    avcon.AVG_Connections_per_Hour,
-    CAST(MAX(storage_in_megabytes) / 1024 AS DECIMAL(10, 2)) StorageGB,
-    CAST(MAX(allocated_storage_in_megabytes) / 1024 AS DECIMAL(10, 2)) Allocated_StorageGB,
-    MIN(end_time) AS StartTime,
-    MAX(end_time) AS EndTime,
-    CAST(AVG(avg_cpu_percent) AS decimal(4,2)) AS Avg_CPU,
-    MAX(avg_cpu_percent) AS Max_CPU,
-    (COUNT(database_name) - SUM(CASE WHEN avg_cpu_percent >= 40 THEN 1 ELSE 0 END) * 1.0) / COUNT(database_name) * 100 AS [CPU Fit %],
-    CAST(AVG(avg_data_io_percent) AS decimal(4,2)) AS Avg_IO,
-    MAX(avg_data_io_percent) AS Max_IO,
-    (COUNT(database_name) - SUM(CASE WHEN avg_data_io_percent >= 40 THEN 1 ELSE 0 END) * 1.0) / COUNT(database_name) * 100 AS [Data IO Fit %],
-    CAST(AVG(avg_log_write_percent) AS decimal(4,2)) AS Avg_LogWrite,
-    MAX(avg_log_write_percent) AS Max_LogWrite,
-    (COUNT(database_name) - SUM(CASE WHEN avg_log_write_percent >= 40 THEN 1 ELSE 0 END) * 1.0) / COUNT(database_name) * 100 AS [Log Write Fit %],
-    CAST(AVG(max_session_percent) AS decimal(4,2)) AS 'Average % of sessions',
-    MAX(max_session_percent) AS 'Maximum % of sessions',
-    CAST(AVG(max_worker_percent) AS decimal(4,2)) AS 'Average % of workers',
-    MAX(max_worker_percent) AS 'Maximum % of workers'
-FROM sys.resource_stats AS rs1
-INNER JOIN sys.databases dbs ON rs1.database_name = dbs.name
-INNER JOIN sys.database_service_objectives sysso ON sysso.database_id = dbs.database_id
-LEFT JOIN (
+WITH ConnectionStats AS (
     SELECT
-        name,
-        ROUND(AVG(CAST(success_count AS FLOAT)), 2) AS AVG_Connections_per_Hour
+        database_name,
+        ROUND(AVG(CAST(hourly_connections AS FLOAT)), 2) AS AVG_Connections_per_Hour
     FROM (
         SELECT
-            name,
-            CONVERT(DATE, start_time) AS Dating,
-            DATEPART(HOUR, start_time) AS Houring,
-            SUM(CASE WHEN name = database_name THEN success_count ELSE 0 END) AS success_count
+            database_name,
+            CONVERT(DATE, start_time)  AS day_bucket,
+            DATEPART(HOUR, start_time) AS hour_bucket,
+            SUM(success_count)         AS hourly_connections
         FROM sys.database_connection_stats
-        CROSS JOIN sys.databases
-        WHERE start_time > @StartDate
-          AND database_id != 1
-        GROUP BY name, CONVERT(DATE, start_time), DATEPART(HOUR, start_time)
-    ) AS t
-    GROUP BY name
-) avcon ON avcon.name = rs1.database_name
-WHERE start_time > @StartDate
-  AND rs1.start_time > @StartDate 
-  AND rs1.database_name != 'master' -- Exclude the master database explicitly
-GROUP BY database_name, sysso.edition, sysso.service_objective, avcon.AVG_Connections_per_Hour
-ORDER BY database_name, sysso.edition, sysso.service_objective;
+        WHERE database_name != 'master'
+        GROUP BY
+            database_name,
+            CONVERT(DATE, start_time),
+            DATEPART(HOUR, start_time)
+    ) AS hourly
+    GROUP BY database_name
+),
+
+LatestDTU AS (
+    SELECT
+        database_name,
+        dtu_limit,
+        ROW_NUMBER() OVER (PARTITION BY database_name ORDER BY start_time DESC) AS rn
+    FROM sys.resource_stats
+)
+
+SELECT
+    @@SERVERNAME                                                         AS ServerName,
+    rs.database_name                                                     AS DatabaseName,
+    sysso.edition,
+    sysso.service_objective,
+    dtu.dtu_limit                                                        AS DTU,
+    con.AVG_Connections_per_Hour,
+    CAST(MAX(rs.storage_in_megabytes)           / 1024 AS DECIMAL(10,2)) AS StorageGB,
+    CAST(MAX(rs.allocated_storage_in_megabytes) / 1024 AS DECIMAL(10,2)) AS Allocated_StorageGB,
+    MIN(rs.end_time)                                                     AS StartTime,
+    MAX(rs.end_time)                                                     AS EndTime,
+    CAST(AVG(rs.avg_cpu_percent)     AS DECIMAL(4,2))                   AS Avg_CPU,
+    MAX(rs.avg_cpu_percent)                                              AS Max_CPU,
+    CAST((COUNT(*) - SUM(CASE WHEN rs.avg_cpu_percent      >= 40 THEN 1 ELSE 0 END)) * 100.0 / COUNT(*) AS DECIMAL(5,2)) AS [CPU Fit %],
+    CAST(AVG(rs.avg_data_io_percent) AS DECIMAL(4,2))                   AS Avg_IO,
+    MAX(rs.avg_data_io_percent)                                          AS Max_IO,
+    CAST((COUNT(*) - SUM(CASE WHEN rs.avg_data_io_percent  >= 40 THEN 1 ELSE 0 END)) * 100.0 / COUNT(*) AS DECIMAL(5,2)) AS [Data IO Fit %],
+    CAST(AVG(rs.avg_log_write_percent) AS DECIMAL(4,2))                 AS Avg_LogWrite,
+    MAX(rs.avg_log_write_percent)                                        AS Max_LogWrite,
+    CAST((COUNT(*) - SUM(CASE WHEN rs.avg_log_write_percent >= 40 THEN 1 ELSE 0 END)) * 100.0 / COUNT(*) AS DECIMAL(5,2)) AS [Log Write Fit %],
+    CAST(AVG(rs.max_session_percent) AS DECIMAL(4,2))                   AS [Avg % Sessions],
+    MAX(rs.max_session_percent)                                          AS [Max % Sessions],
+    CAST(AVG(rs.max_worker_percent)  AS DECIMAL(4,2))                   AS [Avg % Workers],
+    MAX(rs.max_worker_percent)                                           AS [Max % Workers]
+
+FROM sys.resource_stats AS rs
+INNER JOIN sys.databases                   dbs   ON dbs.name           = rs.database_name
+INNER JOIN sys.database_service_objectives sysso ON sysso.database_id  = dbs.database_id
+INNER JOIN LatestDTU                       dtu   ON dtu.database_name  = rs.database_name AND dtu.rn = 1
+LEFT  JOIN ConnectionStats                 con   ON con.database_name  = rs.database_name
+
+WHERE rs.database_name != 'master'
+
+GROUP BY
+    rs.database_name,
+    sysso.edition,
+    sysso.service_objective,
+    con.AVG_Connections_per_Hour,
+    dtu.dtu_limit
+
+ORDER BY
+    rs.database_name,
+    sysso.edition,
+    sysso.service_objective;
