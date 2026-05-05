@@ -29,6 +29,6 @@ You are presented with five categories to choose from:
 | 1 | Performances | Performance-related diagnostics (I/O, buffer, indexes, wait stats, query stats, etc.) — based on [Glenn Berry's Azure SQL Diagnostic Queries](https://glennsqlperformance.com/resources/) |
 | 2 | Quick Investigation | Blocking detection, lock waits, geo-replication status, resumable index rebuilds, etc. — based on [Glenn Berry's Azure SQL Diagnostic Queries](https://glennsqlperformance.com/resources/) |
 | 3 | Perfect Tuning | Evaluates whether Azure SQL databases can be downgraded to a lower service tier — based on [Microsoft DMV monitoring docs](https://learn.microsoft.com/en-us/azure/azure-sql/database/monitoring-with-dmvs?view=azuresql) |
-| 4 | AUTO_SHRINK | Checks if AUTO_SHRINK is enabled on databases |
+| 4 | AUTO_SHRINK | Checks if AUTO_SHRINK is enabled on databases — see [Myth Busters: Who is scared of AUTO_SHRINK?](https://www.jeeja.biz/2024/05/12/myth-busters-who-is-scared-of-auto_shrink/) |
 | 5 | compatibility_level | Queries related to database compatibility level analysis |
 | 6 | Custom Queries | Ad hoc queries (plan cache analysis, duplicate indexes, missing indexes, etc.) |
