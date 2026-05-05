@@ -7,3 +7,6 @@ Results/
 
 # Local-only reference file
 Azure SQL Database Diagnostic Information Queries.sql
+
+# Claude Code local settings
+.claude/
